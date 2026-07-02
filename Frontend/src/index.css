@@ -1,0 +1,17 @@
+/* Reset default browser styles so everything looks consistent */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background-color: #0f0f0f; /* YouTube's dark background */
+  color: #ffffff;
+}
+
+/* Make all inputs and buttons inherit the font */
+input, textarea, select, button {
+  font-family: inherit;
+}
