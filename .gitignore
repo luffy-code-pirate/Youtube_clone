@@ -1,0 +1,14 @@
+# Dependencies - never upload these
+node_modules/
+
+# Secret config files - never upload these
+.env
+.env.local
+.env.production
+
+# Vite/React build output
+dist/
+
+# OS junk files
+.DS_Store
+Thumbs.db
