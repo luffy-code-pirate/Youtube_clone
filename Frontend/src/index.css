@@ -15,3 +15,52 @@ body {
 input, textarea, select, button {
   font-family: inherit;
 }
+
+/* ── Responsive Design ── */
+
+/* Tablet and below (max 768px) */
+@media (max-width: 768px) {
+
+  /* Hide sidebar on smaller screens */
+  aside {
+    display: none;
+  }
+
+  /* Stack header items */
+  header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Make search bar full width on mobile */
+  header form {
+    order: 3;        /* move search to bottom of header */
+    width: 100%;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* Video grid — 2 columns on tablet */
+  .video-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile only (max 480px) */
+@media (max-width: 480px) {
+
+  /* Single column video grid on mobile */
+  .video-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Smaller padding on mobile */
+  .main-content {
+    padding: 8px !important;
+  }
+
+  /* Stack like/dislike buttons */
+  .like-bar {
+    flex-wrap: wrap;
+  }
+}
