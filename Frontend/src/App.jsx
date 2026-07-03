@@ -32,8 +32,10 @@ function App() {
         {sidebarOpen && <Sidebar />}
 
         {/* Main content area — takes up remaining width */}
-        <div style={{ flex: 1, padding: "16px" }}>
-          <Routes>
+<div
+  className="main-content"
+  style={{ flex: 1, padding: "16px", minHeight: "calc(100vh - 57px)" }}
+>          <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
