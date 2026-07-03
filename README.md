@@ -29,6 +29,8 @@ A full-stack YouTube clone built with MongoDB, Express, React, and Node.js.
 ---
 
 ## Project Structure
+
+
 youtube_clone/
 ├── backend/
 │   ├── controllers/     # Route logic
