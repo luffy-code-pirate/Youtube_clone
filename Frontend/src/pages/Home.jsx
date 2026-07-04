@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import api from "../api/axios";
 import VideoCard from "../components/VideoCard";
 
+// Filter categories — must match backend category names
 const CATEGORIES = [
   "All",
   "Web Development",
@@ -15,17 +16,22 @@ const CATEGORIES = [
 ];
 
 export default function Home() {
-  const [videos, setVideos] = useState([]);
-  const [category, setCategory] = useState("All");
-  const [loading, setLoading] = useState(true);
+  const [videos, setVideos] = useState([]);       // all fetched videos
+  const [category, setCategory] = useState("All"); // active filter
+  const [loading, setLoading] = useState(true);   // loading state
+
+  // reads ?search=... from the URL (set by Header search form)
   const [searchParams] = useSearchParams();
   const search = searchParams.get("search") || "";
 
+  // Re-fetch videos whenever search or category changes
   useEffect(() => {
     const fetchVideos = async () => {
       try {
         setLoading(true);
-        const res = await api.get("/videos", { params: { search, category } });
+        const res = await api.get("/videos", {
+          params: { search, category },
+        });
         setVideos(res.data);
       } catch (err) {
         console.error("Error fetching videos:", err);
@@ -38,7 +44,8 @@ export default function Home() {
 
   return (
     <div>
-      {/* Filter chips bar */}
+
+      {/* ── Filter chips bar ── */}
       <div
         className="filter-bar"
         style={{
@@ -48,7 +55,7 @@ export default function Home() {
           padding: "12px 0",
           marginBottom: "20px",
           position: "sticky",
-          top: "56px",
+          top: "56px",         /* sticks just below the header */
           backgroundColor: "#0f0f0f",
           zIndex: 10,
         }}
@@ -66,8 +73,10 @@ export default function Home() {
               fontSize: "14px",
               fontWeight: "500",
               flexShrink: 0,
+              /* active = white bg, inactive = dark bg */
               backgroundColor: category === cat ? "#ffffff" : "#272727",
               color: category === cat ? "#000000" : "#ffffff",
+              transition: "background-color 0.1s",
             }}
           >
             {cat}
@@ -75,7 +84,7 @@ export default function Home() {
         ))}
       </div>
 
-      {/* Search label */}
+      {/* ── Search result label ── */}
       {search && (
         <p style={{ color: "#aaa", marginBottom: "20px", fontSize: "14px" }}>
           Search results for:{" "}
@@ -83,18 +92,21 @@ export default function Home() {
         </p>
       )}
 
-      {/* Loading */}
+      {/* ── Loading state ── */}
       {loading && (
         <div style={{ textAlign: "center", paddingTop: "80px" }}>
           <p style={{ color: "#aaa", fontSize: "16px" }}>Loading...</p>
         </div>
       )}
 
-      {/* No videos */}
+      {/* ── No videos found ── */}
       {!loading && videos.length === 0 && (
         <div style={{ textAlign: "center", paddingTop: "80px" }}>
-          <svg viewBox="0 0 24 24" style={{ width: "80px", fill: "#aaa", marginBottom: "16px" }}>
-            <path d="M4 6.47L5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4z"/>
+          <svg
+            viewBox="0 0 24 24"
+            style={{ width: "80px", fill: "#aaa", marginBottom: "16px" }}
+          >
+            <path d="M4 6.47L5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4z" />
           </svg>
           <p style={{ color: "white", fontSize: "16px", fontWeight: "500", marginBottom: "8px" }}>
             No videos found
@@ -105,21 +117,15 @@ export default function Home() {
         </div>
       )}
 
-      {/* Video grid */}
+      {/* ── Video grid — 3 columns handled by CSS class ── */}
       {!loading && videos.length > 0 && (
-        <div
-          className="video-grid"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "16px 8px",
-          }}
-        >
+        <div className="video-grid">
           {videos.map((video) => (
             <VideoCard key={video._id} video={video} />
           ))}
         </div>
       )}
+
     </div>
   );
 }

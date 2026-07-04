@@ -9,7 +9,7 @@
 body {
   font-family: "Roboto", Arial, sans-serif;
   background-color: #0f0f0f;
-  color: #0f0f0f;
+  color: #ffffff;
   overflow-x: hidden;
 }
 
@@ -22,7 +22,7 @@ a {
   color: inherit;
 }
 
-/* Hide scrollbar but keep functionality */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -38,27 +38,37 @@ a {
   background: #909090;
 }
 
-/* Filter chips scrollbar hidden */
+/* Hide scrollbar on filter bar */
 .filter-bar::-webkit-scrollbar {
   display: none;
 }
-
-/* ── Responsive breakpoints ── */
-@media (max-width: 1300px) {
-  .video-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
+.filter-bar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-@media (max-width: 950px) {
+/* ── Desktop (default): 3 columns ── */
+.video-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 8px;
+}
+
+/* ── Tablet (max 1100px): 2 columns ── */
+@media (max-width: 1100px) {
   .video-grid {
     grid-template-columns: repeat(2, 1fr) !important;
   }
+}
+
+/* ── Small tablet (max 900px): hide sidebar ── */
+@media (max-width: 900px) {
   .sidebar {
     display: none !important;
   }
 }
 
+/* ── Mobile (max 600px): 1 column ── */
 @media (max-width: 600px) {
   .video-grid {
     grid-template-columns: 1fr !important;
