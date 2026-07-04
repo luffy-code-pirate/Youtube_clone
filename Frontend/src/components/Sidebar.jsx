@@ -1,52 +1,77 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function Sidebar() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
 
-  // Main navigation items (always visible)
   const mainItems = [
     { icon: "🏠", label: "Home", path: "/" },
-    { icon: "🔥", label: "Trending", path: "/" },
+    { icon: "▶️", label: "Shorts", path: "/" },
     { icon: "📺", label: "Subscriptions", path: "/" },
   ];
 
-  // Items only relevant when logged in
   const userItems = [
     { icon: "🕐", label: "History", path: "/" },
-    { icon: "▶️", label: "Your Videos", path: "/channel/mine" },
-    { icon: "👍", label: "Liked Videos", path: "/" },
+    { icon: "🎬", label: "Your videos", path: "/channel/mine" },
+    { icon: "⏰", label: "Watch later", path: "/" },
+    { icon: "👍", label: "Liked videos", path: "/" },
   ];
 
-  // Explore section
   const exploreItems = [
+    { icon: "🔥", label: "Trending", path: "/" },
+    { icon: "🛒", label: "Shopping", path: "/" },
     { icon: "🎵", label: "Music", path: "/?category=Music" },
+    { icon: "🎬", label: "Movies", path: "/" },
+    { icon: "📡", label: "Live", path: "/" },
     { icon: "🎮", label: "Gaming", path: "/?category=Gaming" },
     { icon: "📰", label: "News", path: "/?category=News" },
-    { icon: "🎓", label: "Education", path: "/?category=Education" },
+    { icon: "🏆", label: "Sports", path: "/" },
+    { icon: "🎓", label: "Courses", path: "/?category=Education" },
   ];
 
   return (
-    <aside style={{
-      width: "220px",
-      minHeight: "calc(100vh - 57px)", /* full height minus header */
-      backgroundColor: "#0f0f0f",
-      padding: "12px 0",
-      borderRight: "1px solid #272727",
-      overflowY: "auto",
-    }}>
-
-      {/* Main navigation */}
+    <aside
+      className="sidebar"
+      style={{
+        width: "240px",
+        minHeight: "calc(100vh - 56px)",
+        backgroundColor: "#0f0f0f",
+        padding: "12px 0",
+        overflowY: "auto",
+        position: "sticky",
+        top: "56px",
+        height: "calc(100vh - 56px)",
+        flexShrink: 0,
+      }}
+    >
+      {/* Main nav */}
       {mainItems.map((item) => (
-        <SidebarItem key={item.label} item={item} navigate={navigate} />
+        <SidebarItem
+          key={item.label}
+          item={item}
+          navigate={navigate}
+          active={location.pathname === item.path}
+        />
       ))}
 
       <Divider />
 
-      {/* User-specific items */}
+      {/* You section */}
       {user && (
         <>
+          <p style={{
+            padding: "8px 24px",
+            color: "white",
+            fontSize: "15px",
+            fontWeight: "600",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+          }}>
+            You <span style={{ fontSize: "12px" }}>›</span>
+          </p>
           {userItems.map((item) => (
             <SidebarItem key={item.label} item={item} navigate={navigate} />
           ))}
@@ -54,8 +79,13 @@ export default function Sidebar() {
         </>
       )}
 
-      {/* Explore section header */}
-      <p style={{ padding: "8px 16px", color: "#aaa", fontSize: "14px", fontWeight: "bold" }}>
+      {/* Explore section */}
+      <p style={{
+        padding: "8px 24px",
+        color: "white",
+        fontSize: "15px",
+        fontWeight: "600",
+      }}>
         Explore
       </p>
 
@@ -65,43 +95,80 @@ export default function Sidebar() {
 
       <Divider />
 
-      {/* Create channel button — only if logged in */}
+      {/* Create channel */}
       {user && (
         <SidebarItem
           item={{ icon: "➕", label: "Create Channel", path: "/create-channel" }}
           navigate={navigate}
         />
       )}
+
+      {!user && (
+        <div style={{ padding: "16px 24px" }}>
+          <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "12px", lineHeight: "1.5" }}>
+            Sign in to like videos, comment, and subscribe.
+          </p>
+          <button
+            onClick={() => navigate("/login")}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px 16px",
+              backgroundColor: "transparent",
+              border: "1px solid #3ea6ff",
+              borderRadius: "20px",
+              color: "#3ea6ff",
+              cursor: "pointer",
+              fontSize: "14px",
+            }}
+          >
+            👤 Sign in
+          </button>
+        </div>
+      )}
     </aside>
   );
 }
 
-// Reusable single sidebar row
-function SidebarItem({ item, navigate }) {
+function SidebarItem({ item, navigate, active }) {
   return (
     <div
       onClick={() => navigate(item.path)}
       style={{
         display: "flex",
         alignItems: "center",
-        gap: "16px",
-        padding: "10px 16px",
+        gap: "24px",
+        padding: "10px 24px",
         cursor: "pointer",
-        borderRadius: "8px",
+        borderRadius: "10px",
         margin: "0 8px",
+        backgroundColor: active ? "#272727" : "transparent",
         color: "white",
+        fontSize: "14px",
+        fontWeight: active ? "600" : "400",
       }}
-      // Hover effect using inline event handlers
-      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#272727"}
-      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+      onMouseEnter={(e) => {
+        if (!active) e.currentTarget.style.backgroundColor = "#272727";
+      }}
+      onMouseLeave={(e) => {
+        if (!active) e.currentTarget.style.backgroundColor = "transparent";
+      }}
     >
-      <span style={{ fontSize: "18px" }}>{item.icon}</span>
-      <span style={{ fontSize: "14px" }}>{item.label}</span>
+      <span style={{ fontSize: "20px", minWidth: "24px", textAlign: "center" }}>
+        {item.icon}
+      </span>
+      <span>{item.label}</span>
     </div>
   );
 }
 
-// Simple horizontal line between sections
 function Divider() {
-  return <hr style={{ border: "none", borderTop: "1px solid #272727", margin: "8px 0" }} />;
+  return (
+    <hr style={{
+      border: "none",
+      borderTop: "1px solid #272727",
+      margin: "12px 0",
+    }} />
+  );
 }
