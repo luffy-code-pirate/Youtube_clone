@@ -13,7 +13,7 @@ export default function VideoCard({ video }) {
     const now = new Date();
     const then = new Date(dateStr);
     const diff = Math.floor((now - then) / 1000);
-    if (diff < 60) return `${diff} seconds ago`;
+    if (diff < 60) return "just now";
     if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
     if (diff < 2592000) return `${Math.floor(diff / 86400)} days ago`;
@@ -21,23 +21,22 @@ export default function VideoCard({ video }) {
     return `${Math.floor(diff / 31536000)} years ago`;
   };
 
-  // Get first letter of channel name for avatar
   const channelInitial = video.channelId?.channelName?.[0]?.toUpperCase() || "C";
 
   return (
-    <div
-      onClick={() => navigate(`/video/${video._id}`)}
-      style={{ cursor: "pointer", width: "100%" }}
-    >
-      {/* Thumbnail container — 16:9 ratio */}
-      <div style={{
-        position: "relative",
-        width: "100%",
-        paddingTop: "56.25%",
-        borderRadius: "12px",
-        overflow: "hidden",
-        backgroundColor: "#272727",
-      }}>
+    <div style={{ cursor: "pointer", width: "100%" }}>
+      {/* Thumbnail */}
+      <div
+        onClick={() => navigate(`/video/${video._id}`)}
+        style={{
+          position: "relative",
+          width: "100%",
+          paddingTop: "56.25%",
+          borderRadius: "12px",
+          overflow: "hidden",
+          backgroundColor: "#272727",
+        }}
+      >
         <img
           src={video.thumbnailUrl}
           alt={video.title}
@@ -47,75 +46,92 @@ export default function VideoCard({ video }) {
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            transition: "transform 0.2s ease",
           }}
-          onMouseEnter={(e) => e.target.style.transform = "scale(1.03)"}
-          onMouseLeave={(e) => e.target.style.transform = "scale(1)"}
           onError={(e) => { e.target.style.display = "none"; }}
         />
       </div>
 
-      {/* Video info row */}
+      {/* Info row */}
       <div style={{
         display: "flex",
         gap: "12px",
-        padding: "12px 0",
+        padding: "12px 0 20px",
       }}>
         {/* Channel avatar */}
-        <div style={{
-          width: "36px",
-          height: "36px",
-          borderRadius: "50%",
-          backgroundColor: "#ff0000",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "white",
-          fontWeight: "bold",
-          fontSize: "14px",
-          flexShrink: 0,
-          marginTop: "2px",
-        }}>
+        <div
+          onClick={() => navigate(`/channel/${video.channelId?._id}`)}
+          style={{
+            width: "36px",
+            height: "36px",
+            borderRadius: "50%",
+            backgroundColor: getColor(channelInitial),
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "white",
+            fontWeight: "500",
+            fontSize: "14px",
+            flexShrink: 0,
+            marginTop: "2px",
+            cursor: "pointer",
+          }}
+        >
           {channelInitial}
         </div>
 
-        {/* Title + meta */}
+        {/* Text info */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Title — max 2 lines */}
-          <h4 style={{
-            color: "white",
-            fontSize: "14px",
-            fontWeight: "600",
-            lineHeight: "1.4",
-            marginBottom: "6px",
-            display: "-webkit-box",
-            WebkitLineClamp: 2,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-          }}>
+          {/* Title */}
+          <h4
+            onClick={() => navigate(`/video/${video._id}`)}
+            style={{
+              color: "white",
+              fontSize: "14px",
+              fontWeight: "500",
+              lineHeight: "20px",
+              maxHeight: "40px",
+              overflow: "hidden",
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              marginBottom: "6px",
+            }}
+          >
             {video.title}
           </h4>
 
           {/* Channel name */}
-          <p style={{
-            color: "#aaa",
-            fontSize: "13px",
-            marginBottom: "2px",
-          }}
-            onClick={(e) => {
-              e.stopPropagation(); // don't trigger video click
-              navigate(`/channel/${video.channelId?._id}`);
+          <p
+            onClick={() => navigate(`/channel/${video.channelId?._id}`)}
+            style={{
+              color: "#aaaaaa",
+              fontSize: "13px",
+              lineHeight: "18px",
+              marginBottom: "2px",
+              cursor: "pointer",
             }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "white"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "#aaaaaa"}
           >
             {video.channelId?.channelName || "Unknown Channel"}
           </p>
 
-          {/* Views • time ago */}
-          <p style={{ color: "#aaa", fontSize: "13px" }}>
+          {/* Views • time */}
+          <p style={{ color: "#aaaaaa", fontSize: "13px", lineHeight: "18px" }}>
             {formatViews(video.views)} views • {timeAgo(video.createdAt)}
           </p>
         </div>
       </div>
     </div>
   );
+}
+
+// Give each channel a consistent color based on first letter
+function getColor(letter) {
+  const colors = [
+    "#ff0000","#ff6d00","#ffab00","#2e7d32",
+    "#1565c0","#6a1b9a","#ad1457","#00838f",
+  ];
+  const index = (letter?.charCodeAt(0) || 0) % colors.length;
+  return colors[index];
 }

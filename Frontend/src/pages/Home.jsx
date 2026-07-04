@@ -4,9 +4,14 @@ import api from "../api/axios";
 import VideoCard from "../components/VideoCard";
 
 const CATEGORIES = [
-  "All", "Web Development", "JavaScript",
-  "Data Structures", "Music", "Gaming",
-  "Education", "News",
+  "All",
+  "Web Development",
+  "JavaScript",
+  "Data Structures",
+  "Music",
+  "Gaming",
+  "Education",
+  "News",
 ];
 
 export default function Home() {
@@ -33,25 +38,27 @@ export default function Home() {
 
   return (
     <div>
-      {/* ── Filter chips ── */}
-      <div style={{
-        display: "flex",
-        gap: "12px",
-        overflowX: "auto",
-        padding: "12px 0",
-        marginBottom: "16px",
-        scrollbarWidth: "none", /* hide scrollbar on Firefox */
-        position: "sticky",
-        top: "56px",
-        backgroundColor: "#0f0f0f",
-        zIndex: 10,
-      }}>
+      {/* Filter chips bar */}
+      <div
+        className="filter-bar"
+        style={{
+          display: "flex",
+          gap: "12px",
+          overflowX: "auto",
+          padding: "12px 0",
+          marginBottom: "20px",
+          position: "sticky",
+          top: "56px",
+          backgroundColor: "#0f0f0f",
+          zIndex: 10,
+        }}
+      >
         {CATEGORIES.map((cat) => (
           <button
             key={cat}
             onClick={() => setCategory(cat)}
             style={{
-              padding: "6px 14px",
+              padding: "6px 12px",
               borderRadius: "8px",
               border: "none",
               cursor: "pointer",
@@ -61,7 +68,6 @@ export default function Home() {
               flexShrink: 0,
               backgroundColor: category === cat ? "#ffffff" : "#272727",
               color: category === cat ? "#000000" : "#ffffff",
-              transition: "background-color 0.1s ease",
             }}
           >
             {cat}
@@ -71,39 +77,42 @@ export default function Home() {
 
       {/* Search label */}
       {search && (
-        <p style={{ color: "#aaa", marginBottom: "16px", fontSize: "14px" }}>
-          Results for: <strong style={{ color: "white" }}>"{search}"</strong>
+        <p style={{ color: "#aaa", marginBottom: "20px", fontSize: "14px" }}>
+          Search results for:{" "}
+          <strong style={{ color: "white" }}>"{search}"</strong>
         </p>
       )}
 
       {/* Loading */}
       {loading && (
-        <div style={{ textAlign: "center", padding: "60px" }}>
-          <p style={{ color: "#aaa" }}>Loading...</p>
+        <div style={{ textAlign: "center", paddingTop: "80px" }}>
+          <p style={{ color: "#aaa", fontSize: "16px" }}>Loading...</p>
         </div>
       )}
 
       {/* No videos */}
       {!loading && videos.length === 0 && (
-        <div style={{ textAlign: "center", padding: "60px" }}>
-          <p style={{ fontSize: "24px", marginBottom: "8px" }}>📭</p>
-          <p style={{ color: "white", fontWeight: "600", marginBottom: "4px" }}>
+        <div style={{ textAlign: "center", paddingTop: "80px" }}>
+          <svg viewBox="0 0 24 24" style={{ width: "80px", fill: "#aaa", marginBottom: "16px" }}>
+            <path d="M4 6.47L5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4z"/>
+          </svg>
+          <p style={{ color: "white", fontSize: "16px", fontWeight: "500", marginBottom: "8px" }}>
             No videos found
           </p>
           <p style={{ color: "#aaa", fontSize: "14px" }}>
-            Try a different search or filter
+            Try a different search or category
           </p>
         </div>
       )}
 
-      {/* Video grid — matches YouTube's layout */}
+      {/* Video grid */}
       {!loading && videos.length > 0 && (
         <div
           className="video-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "16px",
+            gap: "16px 8px",
           }}
         >
           {videos.map((video) => (
