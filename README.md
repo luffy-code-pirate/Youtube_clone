@@ -30,20 +30,22 @@ A full-stack YouTube clone built with MongoDB, Express, React, and Node.js.
 
 ## Project Structure
 
-
+```
 youtube_clone/
 ├── backend/
-│   ├── controllers/     # Route logic
-│   ├── middleware/      # JWT auth middleware
-│   ├── models/          # Mongoose schemas
-│   ├── routes/          # API endpoints
-│   └── server.js        # Entry point
+│   ├── controllers/        # Route logic
+│   ├── middleware/         # JWT auth middleware
+│   ├── models/             # Mongoose schemas
+│   ├── routes/             # API endpoints
+│   ├── seed.js             # Database seeder
+│   └── server.js           # Entry point
 └── frontend/
-└── src/
-├── api/         # Axios instance
-├── components/  # Header, Sidebar, VideoCard
-├── context/     # AuthContext (global login state)
-└── pages/       # Home, Login, Register, VideoPlayer, Channel etc.
+    └── src/
+        ├── api/            # Axios instance with JWT interceptor
+        ├── components/     # Header, Sidebar, VideoCard
+        ├── context/        # AuthContext (global login state)
+        └── pages/          # Home, Login, Register, VideoPlayer, Channel etc.
+```
 
 ---
 
@@ -154,12 +156,20 @@ POST /api/videos
 
 ## Seed Database
 
-To help evaluators test the app, import the sample data:
+To help evaluators test the app, run the seed script:
 
-1. Make sure MongoDB is running
-2. Register a user at `/register`
-3. Create a channel at `/create-channel`
-4. Upload videos at `/upload`
+```bash
+cd backend
+node seed.js
+```
+
+This creates sample users, channels, videos and comments automatically.
+
+### Test Login Credentials
+| Email | Password |
+|---|---|
+| john@example.com | 123456 |
+| jane@example.com | 123456 |
 
 ---
 
