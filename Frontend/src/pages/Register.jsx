@@ -3,23 +3,19 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 
 export default function Register() {
-  // Store form field values
   const [form, setForm] = useState({
     username: "",
     email: "",
     password: "",
   });
-
-  const [error, setError] = useState("");     // error message to show user
-  const [loading, setLoading] = useState(false); // prevent double submits
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Called when user submits the form
   const handleSubmit = async (e) => {
-    e.preventDefault(); // stop browser from refreshing the page
-    setError("");        // clear any previous error
+    e.preventDefault();
+    setError("");
 
-    // Frontend validation — PDF requires showing error messages
     if (!form.username || !form.email || !form.password) {
       return setError("All fields are required");
     }
@@ -35,13 +31,9 @@ export default function Register() {
 
     try {
       setLoading(true);
-      // Send registration data to our backend
       await api.post("/users/register", form);
-
-      // PDF says: after registration, redirect to login page
       navigate("/login");
     } catch (err) {
-      // Show error from backend (e.g. "User already exists")
       setError(err.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
@@ -50,127 +42,232 @@ export default function Register() {
 
   return (
     <div style={{
-      minHeight: "80vh",
+      minHeight: "100vh",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
+      backgroundColor: "#0f0f0f",
     }}>
       <div style={{
         backgroundColor: "#1f1f1f",
-        padding: "40px",
+        border: "1px solid #303030",
         borderRadius: "12px",
         width: "100%",
-        maxWidth: "380px",
-        border: "1px solid #303030",
+        maxWidth: "400px",
+        padding: "48px 40px",
       }}>
-        {/* Logo + title */}
-        <h2 style={{ textAlign: "center", marginBottom: "8px" }}>📺 YouTube</h2>
-        <h3 style={{ textAlign: "center", marginBottom: "24px", color: "#aaa", fontWeight: "normal" }}>
-          Create your account
-        </h3>
 
-        {/* Error message box */}
+        {/* ── YouTube Logo ── */}
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "6px",
+          marginBottom: "24px",
+        }}>
+          <div style={{
+            backgroundColor: "#ff0000",
+            borderRadius: "6px",
+            width: "40px",
+            height: "28px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <div style={{
+              width: 0,
+              height: 0,
+              borderTop: "7px solid transparent",
+              borderBottom: "7px solid transparent",
+              borderLeft: "12px solid white",
+              marginLeft: "3px",
+            }} />
+          </div>
+          <span style={{
+            color: "white",
+            fontSize: "22px",
+            fontWeight: "700",
+            letterSpacing: "-0.5px",
+          }}>
+            YouTube
+          </span>
+        </div>
+
+        {/* ── Heading ── */}
+        <h2 style={{
+          color: "white",
+          fontSize: "24px",
+          fontWeight: "400",
+          textAlign: "center",
+          marginBottom: "8px",
+        }}>
+          Create your account
+        </h2>
+        <p style={{
+          color: "#aaa",
+          fontSize: "14px",
+          textAlign: "center",
+          marginBottom: "32px",
+        }}>
+          to continue to YouTube
+        </p>
+
+        {/* ── Error message ── */}
         {error && (
           <div style={{
-            backgroundColor: "#3a1a1a",
+            backgroundColor: "#2a1515",
+            border: "1px solid #ff4444",
             color: "#ff6b6b",
-            padding: "10px",
-            borderRadius: "6px",
-            marginBottom: "16px",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            marginBottom: "20px",
             fontSize: "14px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
           }}>
+            <span>⚠️</span>
             {error}
           </div>
         )}
 
-        {/* Registration form */}
+        {/* ── Form ── */}
         <form onSubmit={handleSubmit}>
-          {/* Username field */}
-          <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", marginBottom: "6px", color: "#aaa", fontSize: "14px" }}>
-              Username
-            </label>
+
+          {/* Username */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={labelStyle}>Username</label>
             <input
               type="text"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
-              placeholder="Enter username"
+              placeholder="Choose a username"
               style={inputStyle}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#3ea6ff";
+                e.target.style.boxShadow = "0 0 0 1px #3ea6ff";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#444";
+                e.target.style.boxShadow = "none";
+              }}
             />
           </div>
 
-          {/* Email field */}
-          <div style={{ marginBottom: "16px" }}>
-            <label style={{ display: "block", marginBottom: "6px", color: "#aaa", fontSize: "14px" }}>
-              Email
-            </label>
+          {/* Email */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={labelStyle}>Email</label>
             <input
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="Enter email"
+              placeholder="Enter your email"
               style={inputStyle}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#3ea6ff";
+                e.target.style.boxShadow = "0 0 0 1px #3ea6ff";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#444";
+                e.target.style.boxShadow = "none";
+              }}
             />
           </div>
 
-          {/* Password field */}
-          <div style={{ marginBottom: "24px" }}>
-            <label style={{ display: "block", marginBottom: "6px", color: "#aaa", fontSize: "14px" }}>
-              Password
-            </label>
+          {/* Password */}
+          <div style={{ marginBottom: "32px" }}>
+            <label style={labelStyle}>Password</label>
             <input
               type="password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="Min 6 characters"
               style={inputStyle}
+              onFocus={(e) => {
+                e.target.style.borderColor = "#3ea6ff";
+                e.target.style.boxShadow = "0 0 0 1px #3ea6ff";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "#444";
+                e.target.style.boxShadow = "none";
+              }}
             />
           </div>
 
-          {/* Submit button */}
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              width: "100%",
-              padding: "12px",
-              backgroundColor: "#ff0000",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              fontSize: "16px",
-              cursor: loading ? "not-allowed" : "pointer",
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading ? "Creating account..." : "Create Account"}
-          </button>
-        </form>
+          {/* Bottom row */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}>
+            {/* Sign in instead */}
+            <button
+              type="button"
+              onClick={() => navigate("/login")}
+              style={{
+                padding: "0 24px",
+                height: "40px",
+                backgroundColor: "transparent",
+                border: "none",
+                color: "#3ea6ff",
+                fontSize: "14px",
+                fontWeight: "500",
+                cursor: "pointer",
+                borderRadius: "4px",
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#1a2a3a"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+            >
+              Sign in instead
+            </button>
 
-        {/* Link to login page */}
-        <p style={{ textAlign: "center", marginTop: "20px", color: "#aaa", fontSize: "14px" }}>
-          Already have an account?{" "}
-          <span
-            onClick={() => navigate("/login")}
-            style={{ color: "#3ea6ff", cursor: "pointer" }}
-          >
-            Sign in
-          </span>
-        </p>
+            {/* Create account button */}
+            <button
+              type="submit"
+              disabled={loading}
+              style={{
+                padding: "0 24px",
+                height: "40px",
+                backgroundColor: "#3ea6ff",
+                border: "none",
+                borderRadius: "4px",
+                color: "#0f0f0f",
+                fontSize: "14px",
+                fontWeight: "600",
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.7 : 1,
+              }}
+              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.backgroundColor = "#65b8ff"; }}
+              onMouseLeave={(e) => { if (!loading) e.currentTarget.style.backgroundColor = "#3ea6ff"; }}
+            >
+              {loading ? "Creating..." : "Next"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
 }
 
-// Reusable input style
+const labelStyle = {
+  display: "block",
+  color: "#aaa",
+  fontSize: "12px",
+  fontWeight: "500",
+  marginBottom: "6px",
+  letterSpacing: "0.5px",
+  textTransform: "uppercase",
+};
+
 const inputStyle = {
   width: "100%",
-  padding: "10px 14px",
-  backgroundColor: "#121212",
-  border: "1px solid #303030",
-  borderRadius: "6px",
+  padding: "14px 16px",
+  backgroundColor: "transparent",
+  border: "1px solid #444",
+  borderRadius: "4px",
   color: "white",
-  fontSize: "14px",
+  fontSize: "16px",
   outline: "none",
   boxSizing: "border-box",
+  transition: "border-color 0.2s",
 };

@@ -41,7 +41,6 @@ export default function VideoPlayer() {
   const fetchRelated = async () => {
     try {
       const res = await api.get("/videos");
-      // show all videos except the current one
       setRelatedVideos(res.data.filter((v) => v._id !== id));
     } catch (err) {
       console.error(err);
@@ -52,7 +51,6 @@ export default function VideoPlayer() {
     fetchVideo();
     fetchComments();
     fetchRelated();
-    // scroll to top when video changes
     window.scrollTo(0, 0);
   }, [id]);
 
@@ -95,6 +93,16 @@ export default function VideoPlayer() {
     fetchComments();
   };
 
+  // Check if logged in user is the author of a comment
+  // String() conversion handles MongoDB ObjectId vs string mismatch
+  const isCommentOwner = (comment) => {
+    if (!user) return false;
+    return (
+      String(user.id) === String(comment.userId?._id) ||
+      String(user.id) === String(comment.userId)
+    );
+  };
+
   const formatViews = (views) => {
     if (!views) return "0";
     if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
@@ -112,8 +120,13 @@ export default function VideoPlayer() {
     return `${Math.floor(diff / 31536000)} years ago`;
   };
 
-  const hasLiked = video?.likedBy?.includes(user?.id);
-  const hasDisliked = video?.dislikedBy?.includes(user?.id);
+  const hasLiked = video?.likedBy?.some(
+    (uid) => String(uid) === String(user?.id)
+  );
+  const hasDisliked = video?.dislikedBy?.some(
+    (uid) => String(uid) === String(user?.id)
+  );
+
   const channelInitial = video?.channelId?.channelName?.[0]?.toUpperCase() || "C";
 
   if (loading) {
@@ -252,7 +265,7 @@ export default function VideoPlayer() {
               borderRadius: "20px",
               overflow: "hidden",
             }}>
-              {/* Like */}
+              {/* Like button */}
               <button
                 onClick={handleLike}
                 style={{
@@ -272,14 +285,13 @@ export default function VideoPlayer() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#3f3f3f"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = hasLiked ? "#3f3f3f" : "transparent"}
               >
-                {/* Thumbs up SVG */}
-                <svg viewBox="0 0 24 24" style={{ width: "20px", fill: hasLiked ? "white" : "white" }}>
+                <svg viewBox="0 0 24 24" style={{ width: "20px", fill: "white" }}>
                   <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
                 </svg>
                 {formatViews(video.likes)}
               </button>
 
-              {/* Dislike */}
+              {/* Dislike button */}
               <button
                 onClick={handleDislike}
                 style={{
@@ -295,7 +307,6 @@ export default function VideoPlayer() {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#3f3f3f"}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = hasDisliked ? "#3f3f3f" : "transparent"}
               >
-                {/* Thumbs down SVG */}
                 <svg viewBox="0 0 24 24" style={{ width: "20px", fill: "white" }}>
                   <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/>
                 </svg>
@@ -303,24 +314,24 @@ export default function VideoPlayer() {
             </div>
 
             {/* Share button */}
-            <button style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "0 16px",
-              height: "36px",
-              backgroundColor: "#272727",
-              border: "none",
-              borderRadius: "18px",
-              color: "white",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "500",
-            }}
+            <button
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "0 16px",
+                height: "36px",
+                backgroundColor: "#272727",
+                border: "none",
+                borderRadius: "18px",
+                color: "white",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#3f3f3f"}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#272727"}
             >
-              {/* Share SVG */}
               <svg viewBox="0 0 24 24" style={{ width: "18px", fill: "white" }}>
                 <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/>
               </svg>
@@ -328,24 +339,24 @@ export default function VideoPlayer() {
             </button>
 
             {/* Download button */}
-            <button style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              padding: "0 16px",
-              height: "36px",
-              backgroundColor: "#272727",
-              border: "none",
-              borderRadius: "18px",
-              color: "white",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "500",
-            }}
+            <button
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "0 16px",
+                height: "36px",
+                backgroundColor: "#272727",
+                border: "none",
+                borderRadius: "18px",
+                color: "white",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "500",
+              }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#3f3f3f"}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#272727"}
             >
-              {/* Download SVG */}
               <svg viewBox="0 0 24 24" style={{ width: "18px", fill: "white" }}>
                 <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
               </svg>
@@ -353,18 +364,19 @@ export default function VideoPlayer() {
             </button>
 
             {/* More options */}
-            <button style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              backgroundColor: "#272727",
-              border: "none",
-              color: "white",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+            <button
+              style={{
+                width: "36px",
+                height: "36px",
+                borderRadius: "50%",
+                backgroundColor: "#272727",
+                border: "none",
+                color: "white",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#3f3f3f"}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#272727"}
             >
@@ -376,24 +388,30 @@ export default function VideoPlayer() {
         </div>
 
         {/* ── Description box ── */}
-        <div style={{
-          backgroundColor: "#272727",
-          borderRadius: "12px",
-          padding: "12px 16px",
-          marginBottom: "24px",
-          cursor: "pointer",
-        }}
+        <div
+          style={{
+            backgroundColor: "#272727",
+            borderRadius: "12px",
+            padding: "12px 16px",
+            marginBottom: "24px",
+            cursor: "pointer",
+          }}
           onClick={() => setShowFullDesc(!showFullDesc)}
         >
-          {/* Views + date */}
-          <p style={{ color: "white", fontSize: "14px", fontWeight: "500", marginBottom: "8px" }}>
+          <p style={{
+            color: "white",
+            fontSize: "14px",
+            fontWeight: "500",
+            marginBottom: "8px",
+          }}>
             {formatViews(video.views)} views &nbsp;
             {new Date(video.createdAt).toLocaleDateString("en-US", {
-              year: "numeric", month: "short", day: "numeric",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
             })}
           </p>
 
-          {/* Description text */}
           <p style={{
             color: "white",
             fontSize: "14px",
@@ -407,7 +425,12 @@ export default function VideoPlayer() {
             {video.description || "No description provided."}
           </p>
 
-          <p style={{ color: "white", fontSize: "14px", fontWeight: "600", marginTop: "8px" }}>
+          <p style={{
+            color: "white",
+            fontSize: "14px",
+            fontWeight: "600",
+            marginTop: "8px",
+          }}>
             {showFullDesc ? "Show less" : "...more"}
           </p>
         </div>
@@ -416,7 +439,6 @@ export default function VideoPlayer() {
             Comments
         ══════════════ */}
         <div>
-          {/* Comments count */}
           <h3 style={{
             color: "white",
             fontSize: "16px",
@@ -426,7 +448,7 @@ export default function VideoPlayer() {
             {comments.length} Comments
           </h3>
 
-          {/* Add comment — only when logged in */}
+          {/* Add comment */}
           {user ? (
             <div style={{
               display: "flex",
@@ -471,7 +493,6 @@ export default function VideoPlayer() {
                   onBlur={(e) => e.target.style.borderBottomColor = "#3f3f3f"}
                 />
 
-                {/* Buttons — only visible when typing */}
                 {commentText && (
                   <div style={{
                     display: "flex",
@@ -509,12 +530,15 @@ export default function VideoPlayer() {
 
           {/* Comment list */}
           {comments.map((comment) => (
-            <div key={comment._id} style={{
-              display: "flex",
-              gap: "16px",
-              marginBottom: "24px",
-            }}>
-              {/* Commenter avatar */}
+            <div
+              key={comment._id}
+              style={{
+                display: "flex",
+                gap: "16px",
+                marginBottom: "24px",
+              }}
+            >
+              {/* Avatar */}
               <div style={{
                 width: "40px",
                 height: "40px",
@@ -532,9 +556,18 @@ export default function VideoPlayer() {
               </div>
 
               <div style={{ flex: 1 }}>
-                {/* Name + timestamp */}
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                  <span style={{ color: "white", fontSize: "13px", fontWeight: "500" }}>
+                {/* Name + time */}
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  marginBottom: "4px",
+                }}>
+                  <span style={{
+                    color: "white",
+                    fontSize: "13px",
+                    fontWeight: "500",
+                  }}>
                     @{comment.userId?.username || "Unknown"}
                   </span>
                   <span style={{ color: "#aaa", fontSize: "12px" }}>
@@ -542,7 +575,7 @@ export default function VideoPlayer() {
                   </span>
                 </div>
 
-                {/* Edit mode vs display mode */}
+                {/* Edit mode */}
                 {editingId === comment._id ? (
                   <div>
                     <input
@@ -560,11 +593,25 @@ export default function VideoPlayer() {
                         boxSizing: "border-box",
                       }}
                     />
-                    <div style={{ display: "flex", gap: "8px", marginTop: "8px", justifyContent: "flex-end" }}>
-                      <button onClick={() => setEditingId(null)} style={ghostBtnStyle}>
+                    <div style={{
+                      display: "flex",
+                      gap: "8px",
+                      marginTop: "8px",
+                      justifyContent: "flex-end",
+                    }}>
+                      <button
+                        onClick={() => {
+                          setEditingId(null);
+                          setEditText("");
+                        }}
+                        style={ghostBtnStyle}
+                      >
                         Cancel
                       </button>
-                      <button onClick={() => handleSaveEdit(comment._id)} style={blueBtnStyle}>
+                      <button
+                        onClick={() => handleSaveEdit(comment._id)}
+                        style={blueBtnStyle}
+                      >
                         Save
                       </button>
                     </div>
@@ -572,38 +619,67 @@ export default function VideoPlayer() {
                 ) : (
                   <>
                     {/* Comment text */}
-                    <p style={{ color: "white", fontSize: "14px", lineHeight: "20px", marginBottom: "8px" }}>
+                    <p style={{
+                      color: "white",
+                      fontSize: "14px",
+                      lineHeight: "20px",
+                      marginBottom: "8px",
+                    }}>
                       {comment.text}
                     </p>
 
-                    {/* Like / Reply row */}
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    {/* Action buttons row */}
+                    <div style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                    }}>
+                      {/* Like icon */}
                       <button style={iconBtnStyle}>
                         <svg viewBox="0 0 24 24" style={{ width: "16px", fill: "#aaa" }}>
                           <path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.95 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z"/>
                         </svg>
                       </button>
+
+                      {/* Dislike icon */}
                       <button style={iconBtnStyle}>
                         <svg viewBox="0 0 24 24" style={{ width: "16px", fill: "#aaa" }}>
                           <path d="M15 3H6c-.83 0-1.54.5-1.84 1.22l-3.02 7.05c-.09.23-.14.47-.14.73v2c0 1.1.9 2 2 2h6.31l-.95 4.57-.03.32c0 .41.17.79.44 1.06L9.83 23l6.59-6.59c.36-.36.58-.86.58-1.41V5c0-1.1-.9-2-2-2zm4 0v12h4V3h-4z"/>
                         </svg>
                       </button>
-                      <button style={{ ...iconBtnStyle, color: "#aaa", fontSize: "13px", fontWeight: "600" }}>
+
+                      {/* Reply */}
+                      <button style={{
+                        ...iconBtnStyle,
+                        color: "#aaa",
+                        fontSize: "13px",
+                        fontWeight: "600",
+                      }}>
                         Reply
                       </button>
 
-                      {/* Edit/Delete — only for comment owner */}
-                      {user && user.id === comment.userId?._id && (
+                      {/* Edit / Delete — only for comment owner */}
+                      {isCommentOwner(comment) && (
                         <>
                           <button
                             onClick={() => handleStartEdit(comment)}
-                            style={{ ...iconBtnStyle, color: "#aaa", fontSize: "13px" }}
+                            style={{
+                              ...iconBtnStyle,
+                              color: "#aaa",
+                              fontSize: "13px",
+                              padding: "4px 8px",
+                            }}
                           >
                             ✏️ Edit
                           </button>
                           <button
                             onClick={() => handleDeleteComment(comment._id)}
-                            style={{ ...iconBtnStyle, color: "#ff6b6b", fontSize: "13px" }}
+                            style={{
+                              ...iconBtnStyle,
+                              color: "#ff6b6b",
+                              fontSize: "13px",
+                              padding: "4px 8px",
+                            }}
                           >
                             🗑️ Delete
                           </button>
@@ -619,7 +695,7 @@ export default function VideoPlayer() {
       </div>
 
       {/* ══════════════════════════════════
-          RIGHT — Related Videos panel
+          RIGHT — Related Videos
       ══════════════════════════════════ */}
       <div style={{
         width: "400px",
@@ -628,7 +704,12 @@ export default function VideoPlayer() {
         flexDirection: "column",
         gap: "8px",
       }}>
-        <h3 style={{ color: "white", fontSize: "16px", fontWeight: "600", marginBottom: "8px" }}>
+        <h3 style={{
+          color: "white",
+          fontSize: "16px",
+          fontWeight: "600",
+          marginBottom: "8px",
+        }}>
           Up next
         </h3>
 
@@ -665,7 +746,6 @@ export default function VideoPlayer() {
 
             {/* Info */}
             <div style={{ flex: 1, minWidth: 0, paddingTop: "2px" }}>
-              {/* Title */}
               <p style={{
                 color: "white",
                 fontSize: "13px",
@@ -679,11 +759,9 @@ export default function VideoPlayer() {
               }}>
                 {v.title}
               </p>
-              {/* Channel */}
               <p style={{ color: "#aaa", fontSize: "12px", marginBottom: "2px" }}>
                 {v.channelId?.channelName || "Unknown"}
               </p>
-              {/* Views */}
               <p style={{ color: "#aaa", fontSize: "12px" }}>
                 {formatViews(v.views)} views
               </p>
@@ -696,7 +774,7 @@ export default function VideoPlayer() {
   );
 }
 
-/* ── Helper: consistent avatar color ── */
+/* ── Helper: consistent avatar color by letter ── */
 function getColor(letter) {
   const colors = [
     "#ff0000", "#ff6d00", "#ffab00",
