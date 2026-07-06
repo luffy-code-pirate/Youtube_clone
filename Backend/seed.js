@@ -62,6 +62,9 @@ const seed = async () => {
     console.log("Channels created");
 
     // ── Create videos ──
+    // Two videos per homepage category (All, Web Development, JavaScript,
+    // Data Structures, Music, Gaming, Education, News) so every filter
+    // button returns results instead of showing an empty grid.
     const videosData = [
       {
         title: "Learn React in 30 Minutes",
@@ -76,6 +79,18 @@ const seed = async () => {
         dislikes: 45,
       },
       {
+        title: "Build a REST API with Express",
+        thumbnailUrl: "https://picsum.photos/seed/express/320/180",
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        description: "Step-by-step guide to building a backend API with Node and Express.",
+        category: "Web Development",
+        channelId: channel2._id,
+        uploader: user2._id,
+        views: 9700,
+        likes: 712,
+        dislikes: 19,
+      },
+      {
         title: "JavaScript ES6 Features Explained",
         thumbnailUrl: "https://picsum.photos/seed/js/320/180",
         videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
@@ -86,6 +101,18 @@ const seed = async () => {
         views: 8900,
         likes: 654,
         dislikes: 12,
+      },
+      {
+        title: "Async/Await vs Promises",
+        thumbnailUrl: "https://picsum.photos/seed/async/320/180",
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        description: "Understanding asynchronous JavaScript once and for all.",
+        category: "JavaScript",
+        channelId: channel2._id,
+        uploader: user2._id,
+        views: 6300,
+        likes: 401,
+        dislikes: 9,
       },
       {
         title: "Data Structures for Beginners",
@@ -100,6 +127,18 @@ const seed = async () => {
         dislikes: 23,
       },
       {
+        title: "Binary Trees Explained Visually",
+        thumbnailUrl: "https://picsum.photos/seed/trees/320/180",
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        description: "A visual walkthrough of binary trees and traversal methods.",
+        category: "Data Structures",
+        channelId: channel2._id,
+        uploader: user2._id,
+        views: 7100,
+        likes: 533,
+        dislikes: 14,
+      },
+      {
         title: "Top 10 Programming Music Playlists",
         thumbnailUrl: "https://picsum.photos/seed/music/320/180",
         videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
@@ -110,6 +149,18 @@ const seed = async () => {
         views: 5600,
         likes: 432,
         dislikes: 8,
+      },
+      {
+        title: "Lo-fi Beats for Deep Focus",
+        thumbnailUrl: "https://picsum.photos/seed/lofi/320/180",
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        description: "Two hours of lo-fi beats to help you concentrate.",
+        category: "Music",
+        channelId: channel1._id,
+        uploader: user1._id,
+        views: 18400,
+        likes: 1502,
+        dislikes: 21,
       },
       {
         title: "Gaming Setup Tour 2024",
@@ -124,6 +175,18 @@ const seed = async () => {
         dislikes: 5,
       },
       {
+        title: "Top 5 Indie Games of the Year",
+        thumbnailUrl: "https://picsum.photos/seed/indiegames/320/180",
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        description: "Our picks for the best indie games this year.",
+        category: "Gaming",
+        channelId: channel1._id,
+        uploader: user1._id,
+        views: 4400,
+        likes: 356,
+        dislikes: 11,
+      },
+      {
         title: "How to Learn Web Development in 2024",
         thumbnailUrl: "https://picsum.photos/seed/edu/320/180",
         videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
@@ -135,17 +198,61 @@ const seed = async () => {
         likes: 1800,
         dislikes: 34,
       },
+      {
+        title: "5 Study Techniques That Actually Work",
+        thumbnailUrl: "https://picsum.photos/seed/study/320/180",
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        description: "Science-backed study techniques for better retention.",
+        category: "Education",
+        channelId: channel1._id,
+        uploader: user1._id,
+        views: 13700,
+        likes: 980,
+        dislikes: 27,
+      },
+      {
+        title: "Tech News Weekly Roundup",
+        thumbnailUrl: "https://picsum.photos/seed/technews/320/180",
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        description: "This week's biggest stories from the tech world.",
+        category: "News",
+        channelId: channel1._id,
+        uploader: user1._id,
+        views: 6800,
+        likes: 512,
+        dislikes: 16,
+      },
+      {
+        title: "AI Announcements You Missed This Month",
+        thumbnailUrl: "https://picsum.photos/seed/ainews/320/180",
+        videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
+        description: "Catching up on the latest AI industry announcements.",
+        category: "News",
+        channelId: channel2._id,
+        uploader: user2._id,
+        views: 9100,
+        likes: 674,
+        dislikes: 22,
+      },
     ];
 
     const videos = await Video.insertMany(videosData);
-    console.log("Videos created");
+    console.log(`${videos.length} videos created`);
 
-    // Link videos to channels
+    // Link videos back to their channels dynamically (works no matter
+    // how many videos are added above, no hard-coded indices needed).
+    const channel1VideoIds = videos
+      .filter((v) => v.channelId.toString() === channel1._id.toString())
+      .map((v) => v._id);
+    const channel2VideoIds = videos
+      .filter((v) => v.channelId.toString() === channel2._id.toString())
+      .map((v) => v._id);
+
     await Channel.findByIdAndUpdate(channel1._id, {
-      $push: { videos: { $each: [videos[0]._id, videos[1]._id, videos[2]._id] } },
+      $push: { videos: { $each: channel1VideoIds } },
     });
     await Channel.findByIdAndUpdate(channel2._id, {
-      $push: { videos: { $each: [videos[3]._id, videos[4]._id, videos[5]._id] } },
+      $push: { videos: { $each: channel2VideoIds } },
     });
 
     // ── Create sample comments ──

@@ -1,11 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import { useState } from "react";
 
-// Layout components — visible on every page
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
-
-// Pages — each one maps to a URL route below
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -13,29 +10,28 @@ import VideoPlayer from "./pages/VideoPlayer";
 import Channel from "./pages/Channel";
 import CreateChannel from "./pages/CreateChannel";
 import UploadVideo from "./pages/UploadVideo";
+import Trending from "./pages/Trending";
+import LikedVideos from "./pages/LikedVideos";
+import Subscriptions from "./pages/Subscriptions";
 
 function App() {
-  // Tracks whether the sidebar is open or closed
-  // Toggled by the hamburger button in the Header
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div>
-      {/* Header is always visible at the top */}
-      {/* We pass a function so Header can toggle the sidebar */}
+      {/* Header always visible at top */}
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
-      {/* Sidebar + page content sit side by side */}
       <div style={{ display: "flex" }}>
-
-        {/* Sidebar only renders when sidebarOpen is true */}
+        {/* Sidebar toggles on hamburger click */}
         {sidebarOpen && <Sidebar />}
 
-        {/* Main content area — takes up remaining width */}
-<div
-  className="main-content"
-  style={{ flex: 1, padding: "16px", minHeight: "calc(100vh - 57px)" }}
->          <Routes>
+        {/* Main content area */}
+        <div
+          className="main-content"
+          style={{ flex: 1, padding: "16px", minHeight: "calc(100vh - 56px)" }}
+        >
+          <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
@@ -44,6 +40,9 @@ function App() {
             <Route path="/channel/:id" element={<Channel />} />
             <Route path="/create-channel" element={<CreateChannel />} />
             <Route path="/upload" element={<UploadVideo />} />
+            <Route path="/trending" element={<Trending />} />
+            <Route path="/liked" element={<LikedVideos />} />
+            <Route path="/subscriptions" element={<Subscriptions />} />
           </Routes>
         </div>
       </div>

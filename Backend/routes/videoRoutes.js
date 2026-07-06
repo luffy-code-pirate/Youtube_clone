@@ -1,14 +1,30 @@
 import express from "express";
 import {
-  getVideos, getVideoById, createVideo, updateVideo, deleteVideo, likeVideo, dislikeVideo,
+  getVideos,
+  getTrendingVideos,
+  getLikedVideos,
+  getSubscriptionVideos,
+  getVideoById,
+  createVideo,
+  updateVideo,
+  deleteVideo,
+  likeVideo,
+  dislikeVideo,
 } from "../controllers/videoController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", getVideos);             // public: browse/search/filter
-router.get("/:id", getVideoById);       // public: watch a video
-router.post("/", protect, createVideo); // private: upload
+// ── Special routes MUST come before /:id ──
+// otherwise Express matches "trending" as an ID
+router.get("/trending", getTrendingVideos);
+router.get("/liked", protect, getLikedVideos);
+router.get("/subscriptions", protect, getSubscriptionVideos);
+
+// ── General routes ──
+router.get("/", getVideos);
+router.get("/:id", getVideoById);
+router.post("/", protect, createVideo);
 router.put("/:id", protect, updateVideo);
 router.delete("/:id", protect, deleteVideo);
 router.put("/:id/like", protect, likeVideo);
