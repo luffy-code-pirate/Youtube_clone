@@ -25,8 +25,12 @@ export default function Register() {
     if (!/^\S+@\S+\.\S+$/.test(form.email)) {
       return setError("Please enter a valid email");
     }
-    if (form.password.length < 6) {
-      return setError("Password must be at least 6 characters");
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(form.password)) {
+      return setError(
+        "Password must be at least 8 characters and include uppercase, lowercase, number and special character (@$!%*?&)",
+      );
     }
 
     try {
@@ -41,91 +45,108 @@ export default function Register() {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      backgroundColor: "#0f0f0f",
-    }}>
-      <div style={{
-        backgroundColor: "#1f1f1f",
-        border: "1px solid #303030",
-        borderRadius: "12px",
-        width: "100%",
-        maxWidth: "400px",
-        padding: "48px 40px",
-      }}>
-
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#0f0f0f",
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: "#1f1f1f",
+          border: "1px solid #303030",
+          borderRadius: "12px",
+          width: "100%",
+          maxWidth: "400px",
+          padding: "48px 40px",
+        }}
+      >
         {/* ── YouTube Logo ── */}
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "6px",
-          marginBottom: "24px",
-        }}>
-          <div style={{
-            backgroundColor: "#ff0000",
-            borderRadius: "6px",
-            width: "40px",
-            height: "28px",
+        <div
+          style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-          }}>
-            <div style={{
-              width: 0,
-              height: 0,
-              borderTop: "7px solid transparent",
-              borderBottom: "7px solid transparent",
-              borderLeft: "12px solid white",
-              marginLeft: "3px",
-            }} />
+            gap: "6px",
+            marginBottom: "24px",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "#ff0000",
+              borderRadius: "6px",
+              width: "40px",
+              height: "28px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <div
+              style={{
+                width: 0,
+                height: 0,
+                borderTop: "7px solid transparent",
+                borderBottom: "7px solid transparent",
+                borderLeft: "12px solid white",
+                marginLeft: "3px",
+              }}
+            />
           </div>
-          <span style={{
-            color: "white",
-            fontSize: "22px",
-            fontWeight: "700",
-            letterSpacing: "-0.5px",
-          }}>
+          <span
+            style={{
+              color: "white",
+              fontSize: "22px",
+              fontWeight: "700",
+              letterSpacing: "-0.5px",
+            }}
+          >
             YouTube
           </span>
         </div>
 
         {/* ── Heading ── */}
-        <h2 style={{
-          color: "white",
-          fontSize: "24px",
-          fontWeight: "400",
-          textAlign: "center",
-          marginBottom: "8px",
-        }}>
+        <h2
+          style={{
+            color: "white",
+            fontSize: "24px",
+            fontWeight: "400",
+            textAlign: "center",
+            marginBottom: "8px",
+          }}
+        >
           Create your account
         </h2>
-        <p style={{
-          color: "#aaa",
-          fontSize: "14px",
-          textAlign: "center",
-          marginBottom: "32px",
-        }}>
+        <p
+          style={{
+            color: "#aaa",
+            fontSize: "14px",
+            textAlign: "center",
+            marginBottom: "32px",
+          }}
+        >
           to continue to YouTube
         </p>
 
         {/* ── Error message ── */}
         {error && (
-          <div style={{
-            backgroundColor: "#2a1515",
-            border: "1px solid #ff4444",
-            color: "#ff6b6b",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            marginBottom: "20px",
-            fontSize: "14px",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-          }}>
+          <div
+            style={{
+              backgroundColor: "#2a1515",
+              border: "1px solid #ff4444",
+              color: "#ff6b6b",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              marginBottom: "20px",
+              fontSize: "14px",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+            }}
+          >
             <span>⚠️</span>
             {error}
           </div>
@@ -133,7 +154,6 @@ export default function Register() {
 
         {/* ── Form ── */}
         <form onSubmit={handleSubmit}>
-
           {/* Username */}
           <div style={{ marginBottom: "20px" }}>
             <label style={labelStyle}>Username</label>
@@ -194,12 +214,26 @@ export default function Register() {
             />
           </div>
 
+          <p
+            style={{
+              color: "#aaa",
+              fontSize: "12px",
+              marginTop: "6px",
+              lineHeight: "1.5",
+            }}
+          >
+            Must be 8+ characters with uppercase, lowercase, number and special
+            character (@$!%*?&)
+          </p>
+
           {/* Bottom row */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
             {/* Sign in instead */}
             <button
               type="button"
@@ -215,8 +249,12 @@ export default function Register() {
                 cursor: "pointer",
                 borderRadius: "4px",
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#1a2a3a"}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#1a2a3a")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "transparent")
+              }
             >
               Sign in instead
             </button>
@@ -237,8 +275,12 @@ export default function Register() {
                 cursor: loading ? "not-allowed" : "pointer",
                 opacity: loading ? 0.7 : 1,
               }}
-              onMouseEnter={(e) => { if (!loading) e.currentTarget.style.backgroundColor = "#65b8ff"; }}
-              onMouseLeave={(e) => { if (!loading) e.currentTarget.style.backgroundColor = "#3ea6ff"; }}
+              onMouseEnter={(e) => {
+                if (!loading) e.currentTarget.style.backgroundColor = "#65b8ff";
+              }}
+              onMouseLeave={(e) => {
+                if (!loading) e.currentTarget.style.backgroundColor = "#3ea6ff";
+              }}
             >
               {loading ? "Creating..." : "Next"}
             </button>

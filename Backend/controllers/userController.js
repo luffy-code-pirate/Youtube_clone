@@ -18,9 +18,12 @@ export const registerUser = async (req, res) => {
     if (!/^\S+@\S+\.\S+$/.test(email)) {
       return res.status(400).json({ message: "Invalid email format" });
     }
-    if (password.length < 6) {
-      return res.status(400).json({ message: "Password must be at least 6 characters" });
-    }
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+if (!passwordRegex.test(password)) {
+  return res.status(400).json({
+    message: "Password must be at least 8 characters and include uppercase, lowercase, number and special character (@$!%*?&)",
+  });
+}
 
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
