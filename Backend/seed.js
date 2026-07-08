@@ -22,18 +22,21 @@ const seed = async () => {
     console.log("Existing data cleared");
 
     // ── Create 2 users ──
-    const hashedPassword = await bcrypt.hash("123456", 10);
+    // passwords now meet the strong validation requirements
+    // uppercase + lowercase + number + special character
+    const hashedPassword1 = await bcrypt.hash("John@1234", 10);
+    const hashedPassword2 = await bcrypt.hash("Jane@1234", 10);
 
     const user1 = await User.create({
       username: "JohnDoe",
       email: "john@example.com",
-      password: hashedPassword,
+      password: hashedPassword1,
     });
 
     const user2 = await User.create({
       username: "JaneSmith",
       email: "jane@example.com",
-      password: hashedPassword,
+      password: hashedPassword2,
     });
 
     console.log("Users created");
@@ -56,8 +59,12 @@ const seed = async () => {
     });
 
     // Link channels to users
-    await User.findByIdAndUpdate(user1._id, { $push: { channels: channel1._id } });
-    await User.findByIdAndUpdate(user2._id, { $push: { channels: channel2._id } });
+    await User.findByIdAndUpdate(user1._id, {
+      $push: { channels: channel1._id },
+    });
+    await User.findByIdAndUpdate(user2._id, {
+      $push: { channels: channel2._id },
+    });
 
     console.log("Channels created");
 
@@ -82,7 +89,8 @@ const seed = async () => {
         title: "Build a REST API with Express",
         thumbnailUrl: "https://picsum.photos/seed/express/320/180",
         videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-        description: "Step-by-step guide to building a backend API with Node and Express.",
+        description:
+          "Step-by-step guide to building a backend API with Node and Express.",
         category: "Web Development",
         channelId: channel2._id,
         uploader: user2._id,
@@ -130,7 +138,8 @@ const seed = async () => {
         title: "Binary Trees Explained Visually",
         thumbnailUrl: "https://picsum.photos/seed/trees/320/180",
         videoUrl: "https://www.w3schools.com/html/mov_bbb.mp4",
-        description: "A visual walkthrough of binary trees and traversal methods.",
+        description:
+          "A visual walkthrough of binary trees and traversal methods.",
         category: "Data Structures",
         channelId: channel2._id,
         uploader: user2._id,
@@ -279,8 +288,8 @@ const seed = async () => {
     console.log("\n✅ Database seeded successfully!");
     console.log("──────────────────────────────────");
     console.log("Test Login Credentials:");
-    console.log("Email: john@example.com  | Password: 123456");
-    console.log("Email: jane@example.com  | Password: 123456");
+    console.log("Email: john@example.com  | Password: John@1234");
+    console.log("Email: jane@example.com  | Password: Jane@1234");
     console.log("──────────────────────────────────");
 
     process.exit(0); // exit script after seeding

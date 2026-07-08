@@ -5,46 +5,75 @@ import { useAuth } from "../context/AuthContext";
 
 export default function Channel() {
   const { id } = useParams();
-  const { user } = useAuth();
+  const { user, authLoading } = useAuth(); // authLoading prevents premature fetches
   const navigate = useNavigate();
 
   const [channel, setChannel] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [noChannel, setNoChannel] = useState(false);
+  const [error, setError] = useState("");
   const [editingVideo, setEditingVideo] = useState(null);
   const [editForm, setEditForm] = useState({});
 
   const fetchChannel = async () => {
     try {
       setLoading(true);
+      setError("");
+      setNoChannel(false);
+
       let res;
+
       if (id === "mine") {
+        // must be logged in to view own channel
+        if (!user) {
+          navigate("/login");
+          return;
+        }
         res = await api.get("/channels/mine");
-        if (!res.data) return navigate("/create-channel");
+
+        // null means user has no channel yet
+        if (!res.data) {
+          setNoChannel(true);
+          setLoading(false);
+          return;
+        }
       } else {
-        res = await api.get(`/channels/${id}`);
-      }
+  if (!id || id === "undefined") {
+    // instead of showing error, redirect to home
+    navigate("/");
+    return;
+  }
+  res = await api.get(`/channels/${id}`);
+}
+
       setChannel(res.data);
     } catch (err) {
       console.error("Error fetching channel:", err);
+      setError("Failed to load channel. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // don't fetch until auth state is fully loaded from localStorage
+    // this is what fixes the /channels/undefined bug on refresh
+    if (authLoading) return;
     fetchChannel();
-  }, [id]);
+  }, [id, user, authLoading]);
 
+  // ── Delete video ──
   const handleDeleteVideo = async (videoId) => {
     if (!window.confirm("Are you sure you want to delete this video?")) return;
     try {
       await api.delete(`/videos/${videoId}`);
       fetchChannel();
     } catch (err) {
-      console.error("Error deleting video:", err);
+      alert("Failed to delete: " + (err.response?.data?.message || err.message));
     }
   };
 
+  // ── Start editing ──
   const handleStartEdit = (video) => {
     setEditingVideo(video._id);
     setEditForm({
@@ -55,40 +84,114 @@ export default function Channel() {
     });
   };
 
+  // ── Save edit ──
   const handleSaveEdit = async (videoId) => {
     try {
       await api.put(`/videos/${videoId}`, editForm);
       setEditingVideo(null);
       fetchChannel();
     } catch (err) {
-      console.error("Error updating video:", err);
+      alert("Failed to update: " + (err.response?.data?.message || err.message));
     }
   };
 
-  // String comparison to handle MongoDB ObjectId vs string mismatch
-  const isOwner =
-    user &&
-    channel &&
-    String(channel.owner) === String(user.id);
-
-  const formatViews = (views) => {
-    if (!views) return "0";
-    if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
-    if (views >= 1000) return `${(views / 1000).toFixed(1)}K`;
-    return views.toString();
+  // ── Subscribe toggle ──
+  const handleSubscribe = async () => {
+    if (!user) return navigate("/login");
+    try {
+      const res = await api.put(`/channels/${channel._id}/subscribe`);
+      setChannel(res.data);
+    } catch (err) {
+      alert(err.response?.data?.message || "Subscribe failed");
+    }
   };
 
-  if (loading) {
+  // string comparison handles MongoDB ObjectId vs string mismatch
+  const isOwner =
+    user && channel && String(channel.owner) === String(user.id);
+
+  const isSubscribed =
+    user &&
+    channel?.subscribedBy?.some(
+      (sid) => String(sid) === String(user.id)
+    );
+
+  const formatCount = (n) => {
+    if (!n) return "0";
+    if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
+    if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
+    return n.toString();
+  };
+
+  // ── Loading state ──
+  if (authLoading || loading) {
     return (
-      <div style={{ color: "white", padding: "40px", textAlign: "center" }}>
+      <div style={{ color: "white", textAlign: "center", padding: "60px" }}>
         Loading...
       </div>
     );
   }
 
+  // ── Error state ──
+  if (error) {
+    return (
+      <div style={{ textAlign: "center", padding: "60px" }}>
+        <p style={{ color: "#ff6b6b", marginBottom: "16px", fontSize: "16px" }}>
+          {error}
+        </p>
+        <button
+          onClick={fetchChannel}
+          style={{
+            padding: "0 20px",
+            height: "36px",
+            backgroundColor: "#272727",
+            color: "white",
+            border: "none",
+            borderRadius: "18px",
+            cursor: "pointer",
+            fontSize: "14px",
+          }}
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  // ── No channel yet ──
+  if (noChannel) {
+    return (
+      <div style={{ textAlign: "center", padding: "80px 20px" }}>
+        <p style={{ color: "white", fontSize: "20px", marginBottom: "8px" }}>
+          You don't have a channel yet
+        </p>
+        <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "24px" }}>
+          Create a channel to upload videos and reach viewers
+        </p>
+        <button
+          onClick={() => navigate("/create-channel")}
+          style={{
+            padding: "0 24px",
+            height: "40px",
+            backgroundColor: "#ff0000",
+            color: "white",
+            border: "none",
+            borderRadius: "20px",
+            fontWeight: "600",
+            fontSize: "14px",
+            cursor: "pointer",
+          }}
+        >
+          Create Channel
+        </button>
+      </div>
+    );
+  }
+
+  // ── Channel not found ──
   if (!channel) {
     return (
-      <div style={{ color: "white", padding: "40px", textAlign: "center" }}>
+      <div style={{ color: "white", textAlign: "center", padding: "60px" }}>
         Channel not found.
       </div>
     );
@@ -109,6 +212,7 @@ export default function Channel() {
             borderRadius: "12px",
             marginBottom: "16px",
           }}
+          onError={(e) => { e.target.style.display = "none"; }}
         />
       ) : (
         <div style={{
@@ -120,7 +224,7 @@ export default function Channel() {
         }} />
       )}
 
-      {/* ── Channel Info Row ── */}
+      {/* ── Channel Info ── */}
       <div style={{
         display: "flex",
         alignItems: "flex-start",
@@ -156,27 +260,42 @@ export default function Channel() {
             {channel.channelName}
           </h1>
           <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "4px" }}>
-            {formatViews(channel.subscribers)} subscribers •{" "}
+            {formatCount(channel.subscribers)} subscribers •{" "}
             {channel.videos?.length || 0} videos
           </p>
-          <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "12px" }}>
+          <p style={{ color: "#aaa", fontSize: "14px", marginBottom: "16px" }}>
             {channel.description}
           </p>
 
-          {/* Subscribe button */}
-          <button style={{
-            padding: "0 16px",
-            height: "36px",
-            backgroundColor: "white",
-            color: "#0f0f0f",
-            border: "none",
-            borderRadius: "18px",
-            fontWeight: "600",
-            fontSize: "14px",
-            cursor: "pointer",
-          }}>
-            Subscribe
-          </button>
+          {/* Subscribe button — hidden from owner */}
+          {!isOwner && (
+            <button
+              onClick={handleSubscribe}
+              style={{
+                padding: "0 20px",
+                height: "36px",
+                backgroundColor: isSubscribed ? "#272727" : "white",
+                color: isSubscribed ? "white" : "#0f0f0f",
+                border: isSubscribed ? "1px solid #717171" : "none",
+                borderRadius: "18px",
+                fontWeight: "600",
+                fontSize: "14px",
+                cursor: "pointer",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = isSubscribed
+                  ? "#3f3f3f"
+                  : "#e0e0e0";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = isSubscribed
+                  ? "#272727"
+                  : "white";
+              }}
+            >
+              {isSubscribed ? "✓ Subscribed" : "Subscribe"}
+            </button>
+          )}
         </div>
 
         {/* Upload button — owner only */}
@@ -203,9 +322,13 @@ export default function Channel() {
         )}
       </div>
 
-      <hr style={{ border: "none", borderTop: "1px solid #272727", marginBottom: "24px" }} />
+      <hr style={{
+        border: "none",
+        borderTop: "1px solid #272727",
+        marginBottom: "24px",
+      }} />
 
-      {/* ── Videos Section ── */}
+      {/* ── Videos ── */}
       <h2 style={{
         color: "white",
         fontSize: "18px",
@@ -215,17 +338,15 @@ export default function Channel() {
         Videos
       </h2>
 
-      {/* No videos message */}
       {channel.videos?.length === 0 && (
         <div style={{ textAlign: "center", padding: "60px" }}>
-          <p style={{ color: "#aaa", fontSize: "16px" }}>
+          <p style={{ color: "#aaa", fontSize: "16px", marginBottom: "16px" }}>
             No videos yet.
           </p>
           {isOwner && (
             <button
               onClick={() => navigate("/upload")}
               style={{
-                marginTop: "16px",
                 padding: "0 20px",
                 height: "40px",
                 backgroundColor: "#ff0000",
@@ -258,7 +379,7 @@ export default function Channel() {
               overflow: "hidden",
             }}
           >
-            {/* Edit mode */}
+            {/* ── Edit mode ── */}
             {editingVideo === video._id ? (
               <div style={{ padding: "16px" }}>
                 <h4 style={{
@@ -269,7 +390,6 @@ export default function Channel() {
                 }}>
                   Edit Video
                 </h4>
-
                 <input
                   value={editForm.title}
                   onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
@@ -287,18 +407,32 @@ export default function Channel() {
                   onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                   placeholder="Description"
                   rows={3}
-                  style={{ ...inputStyle, marginTop: "8px", resize: "vertical", lineHeight: "1.5" }}
+                  style={{
+                    ...inputStyle,
+                    marginTop: "8px",
+                    resize: "vertical",
+                    lineHeight: "1.5",
+                  }}
                 />
                 <select
                   value={editForm.category}
                   onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
                   style={{ ...inputStyle, marginTop: "8px", cursor: "pointer" }}
                 >
-                  {["Web Development","JavaScript","Data Structures","Music","Gaming","Education","News"].map((c) => (
-                    <option key={c} value={c} style={{ backgroundColor: "#121212" }}>{c}</option>
+                  {[
+                    "Web Development",
+                    "JavaScript",
+                    "Data Structures",
+                    "Music",
+                    "Gaming",
+                    "Education",
+                    "News",
+                  ].map((c) => (
+                    <option key={c} value={c} style={{ backgroundColor: "#121212" }}>
+                      {c}
+                    </option>
                   ))}
                 </select>
-
                 <div style={{ display: "flex", gap: "8px", marginTop: "12px" }}>
                   <button
                     onClick={() => setEditingVideo(null)}
@@ -315,9 +449,8 @@ export default function Channel() {
                 </div>
               </div>
             ) : (
-              /* Display mode */
+              /* ── Display mode ── */
               <>
-                {/* Thumbnail */}
                 <div
                   onClick={() => navigate(`/video/${video._id}`)}
                   style={{
@@ -342,7 +475,6 @@ export default function Channel() {
                   />
                 </div>
 
-                {/* Info */}
                 <div style={{ padding: "12px" }}>
                   <h4
                     onClick={() => navigate(`/video/${video._id}`)}
@@ -359,8 +491,12 @@ export default function Channel() {
                   >
                     {video.title}
                   </h4>
-                  <p style={{ color: "#aaa", fontSize: "12px", marginBottom: "10px" }}>
-                    {formatViews(video.views)} views
+                  <p style={{
+                    color: "#aaa",
+                    fontSize: "12px",
+                    marginBottom: "10px",
+                  }}>
+                    {formatCount(video.views)} views
                   </p>
 
                   {/* Edit/Delete — owner only */}

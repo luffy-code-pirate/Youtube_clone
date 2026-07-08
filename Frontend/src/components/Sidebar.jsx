@@ -1,11 +1,92 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export default function Sidebar() {
+// isOpen = true → full sidebar with text
+// isOpen = false → mini sidebar with icons + small labels only
+export default function Sidebar({ isOpen }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
 
+  // Mini sidebar items — shown when hamburger is clicked
+  const miniItems = [
+    { icon: <HomeIcon />, label: "Home", path: "/" },
+    { icon: <ShortsIcon />, label: "Shorts", path: "/" },
+    { icon: <SubIcon />, label: "Subscriptions", path: "/subscriptions" },
+    { icon: <VideosIcon />, label: "You", path: "/channel/mine" },
+  ];
+
+  if (!isOpen) {
+    // ── Mini Sidebar (YouTube style — icons + tiny label) ──
+    return (
+      <aside style={{
+        width: "72px",
+        minHeight: "calc(100vh - 56px)",
+        backgroundColor: "#0f0f0f",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        paddingTop: "8px",
+        flexShrink: 0,
+        position: "sticky",
+        top: "56px",
+        height: "calc(100vh - 56px)",
+        overflowY: "auto",
+      }}>
+        {miniItems.map((item) => {
+          const active = location.pathname === item.path;
+          return (
+            <div
+              key={item.label}
+              onClick={() => navigate(item.path)}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "64px",
+                height: "72px",
+                borderRadius: "12px",
+                cursor: "pointer",
+                backgroundColor: active ? "#272727" : "transparent",
+                marginBottom: "4px",
+                gap: "6px",
+              }}
+              onMouseEnter={(e) => {
+                if (!active) e.currentTarget.style.backgroundColor = "#272727";
+              }}
+              onMouseLeave={(e) => {
+                if (!active) e.currentTarget.style.backgroundColor = "transparent";
+              }}
+            >
+              {/* Icon */}
+              <span style={{
+                width: "24px",
+                height: "24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}>
+                {item.icon}
+              </span>
+              {/* Small label below icon */}
+              <span style={{
+                color: "white",
+                fontSize: "10px",
+                fontWeight: active ? "600" : "400",
+                textAlign: "center",
+                lineHeight: "1.2",
+              }}>
+                {item.label}
+              </span>
+            </div>
+          );
+        })}
+      </aside>
+    );
+  }
+
+  // ── Full Sidebar ──
   return (
     <aside
       className="sidebar"
@@ -22,7 +103,6 @@ export default function Sidebar() {
         paddingBottom: "24px",
       }}
     >
-      {/* ── Main nav ── */}
       <SidebarItem
         icon={<HomeIcon />}
         label="Home"
@@ -43,7 +123,6 @@ export default function Sidebar() {
 
       <Divider />
 
-      {/* ── You section ── */}
       <SectionTitle>
         You
         <svg viewBox="0 0 24 24" style={{ width: "18px", fill: "white", marginLeft: "4px" }}>
@@ -53,22 +132,14 @@ export default function Sidebar() {
 
       {user ? (
         <>
-          <SidebarItem
-            icon={<HistoryIcon />}
-            label="History"
-            onClick={() => navigate("/")}
-          />
+          <SidebarItem icon={<HistoryIcon />} label="History" onClick={() => navigate("/")} />
           <SidebarItem
             icon={<VideosIcon />}
             label="Your videos"
             active={location.pathname === "/channel/mine"}
             onClick={() => navigate("/channel/mine")}
           />
-          <SidebarItem
-            icon={<WatchLaterIcon />}
-            label="Watch later"
-            onClick={() => navigate("/")}
-          />
+          <SidebarItem icon={<WatchLaterIcon />} label="Watch later" onClick={() => navigate("/")} />
           <SidebarItem
             icon={<LikedIcon />}
             label="Liked videos"
@@ -77,14 +148,8 @@ export default function Sidebar() {
           />
         </>
       ) : (
-        // prompt sign in for non-logged in users
         <div style={{ padding: "16px 24px" }}>
-          <p style={{
-            color: "#aaa",
-            fontSize: "14px",
-            lineHeight: "1.6",
-            marginBottom: "16px",
-          }}>
+          <p style={{ color: "#aaa", fontSize: "14px", lineHeight: "1.6", marginBottom: "16px" }}>
             Sign in to like videos, comment, and subscribe.
           </p>
           <button
@@ -112,50 +177,20 @@ export default function Sidebar() {
 
       <Divider />
 
-      {/* ── Explore section ── */}
       <SectionTitle>Explore</SectionTitle>
-
       <SidebarItem
         icon={<TrendingIcon />}
         label="Trending"
         active={location.pathname === "/trending"}
         onClick={() => navigate("/trending")}
       />
-      <SidebarItem
-        icon={<ShoppingIcon />}
-        label="Shopping"
-        onClick={() => navigate("/")}
-      />
-      <SidebarItem
-        icon={<MusicIcon />}
-        label="Music"
-        onClick={() => navigate("/?category=Music")}
-      />
-      <SidebarItem
-        icon={<MoviesIcon />}
-        label="Movies"
-        onClick={() => navigate("/")}
-      />
-      <SidebarItem
-        icon={<LiveIcon />}
-        label="Live"
-        onClick={() => navigate("/")}
-      />
-      <SidebarItem
-        icon={<GamingIcon />}
-        label="Gaming"
-        onClick={() => navigate("/?category=Gaming")}
-      />
-      <SidebarItem
-        icon={<NewsIcon />}
-        label="News"
-        onClick={() => navigate("/?category=News")}
-      />
-      <SidebarItem
-        icon={<CoursesIcon />}
-        label="Courses"
-        onClick={() => navigate("/?category=Education")}
-      />
+      <SidebarItem icon={<ShoppingIcon />} label="Shopping" onClick={() => navigate("/")} />
+      <SidebarItem icon={<MusicIcon />} label="Music" onClick={() => navigate("/?category=Music")} />
+      <SidebarItem icon={<MoviesIcon />} label="Movies" onClick={() => navigate("/")} />
+      <SidebarItem icon={<LiveIcon />} label="Live" onClick={() => navigate("/")} />
+      <SidebarItem icon={<GamingIcon />} label="Gaming" onClick={() => navigate("/?category=Gaming")} />
+      <SidebarItem icon={<NewsIcon />} label="News" onClick={() => navigate("/?category=News")} />
+      <SidebarItem icon={<CoursesIcon />} label="Courses" onClick={() => navigate("/?category=Education")} />
 
       {user && (
         <>
@@ -172,7 +207,6 @@ export default function Sidebar() {
 }
 
 /* ── Sub-components ── */
-
 function SidebarItem({ icon, label, active, onClick }) {
   return (
     <div
@@ -191,26 +225,13 @@ function SidebarItem({ icon, label, active, onClick }) {
         fontSize: "14px",
         fontWeight: active ? "600" : "400",
       }}
-      onMouseEnter={(e) => {
-        if (!active) e.currentTarget.style.backgroundColor = "#272727";
-      }}
-      onMouseLeave={(e) => {
-        if (!active) e.currentTarget.style.backgroundColor = "transparent";
-      }}
+      onMouseEnter={(e) => { if (!active) e.currentTarget.style.backgroundColor = "#272727"; }}
+      onMouseLeave={(e) => { if (!active) e.currentTarget.style.backgroundColor = "transparent"; }}
     >
-      <span style={{
-        width: "24px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}>
+      <span style={{ width: "24px", display: "flex", alignItems: "center", justifyContent: "center" }}>
         {icon}
       </span>
-      <span style={{
-        whiteSpace: "nowrap",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-      }}>
+      <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
         {label}
       </span>
     </div>
@@ -234,13 +255,7 @@ function SectionTitle({ children }) {
 }
 
 function Divider() {
-  return (
-    <hr style={{
-      border: "none",
-      borderTop: "1px solid #272727",
-      margin: "12px 0",
-    }} />
-  );
+  return <hr style={{ border: "none", borderTop: "1px solid #272727", margin: "12px 0" }} />;
 }
 
 /* ── SVG Icons ── */
@@ -324,7 +339,7 @@ function MoviesIcon() {
 function LiveIcon() {
   return (
     <svg viewBox="0 0 24 24" style={{ width: "24px", fill: "white" }}>
-      <path d="M1.56 3.83L3 5.27C1.14 7.13.04 9.69.04 12.5s1.1 5.37 2.96 7.23l-1.44 1.44C-.48 19.09-1.96 15.96-1.96 12.5c0-3.46 1.48-6.59 3.52-8.67zm20.88 0C24.48 5.91 25.96 9.04 25.96 12.5s-1.48 6.59-3.52 8.67l-1.44-1.44C22.86 17.87 23.96 15.31 23.96 12.5s-1.1-5.37-2.96-7.23l1.44-1.44zM12 9c-1.93 0-3.5 1.57-3.5 3.5S10.07 16 12 16s3.5-1.57 3.5-3.5S13.93 9 12 9z" />
+      <path d="M12 9c-1.93 0-3.5 1.57-3.5 3.5S10.07 16 12 16s3.5-1.57 3.5-3.5S13.93 9 12 9zm8.94 2.5c-.32-4.93-4.51-8.86-9.44-8.99V1h-1v1.51C5.57 2.64 1.38 6.57 1.06 11.5H0v1h1.06c.32 4.93 4.51 8.86 9.44 8.99V23h1v-1.51c4.93-.13 9.12-4.06 9.44-8.99H22v-1h-1.06zM12 20c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />
     </svg>
   );
 }

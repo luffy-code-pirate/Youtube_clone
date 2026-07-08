@@ -200,7 +200,11 @@ export default function VideoPlayer() {
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             {/* Avatar */}
             <div
-              onClick={() => navigate(`/channel/${video.channelId?._id}`)}
+              onClick={() => {
+  if (video.channelId?._id) {
+    navigate(`/channel/${video.channelId._id}`);
+  }
+}}
               style={{
                 width: "40px",
                 height: "40px",
@@ -221,7 +225,11 @@ export default function VideoPlayer() {
 
             {/* Channel name + subscribers */}
             <div
-              onClick={() => navigate(`/channel/${video.channelId?._id}`)}
+              onClick={() => {
+  if (video.channelId?._id) {
+    navigate(`/channel/${video.channelId._id}`);
+  }
+}}
               style={{ cursor: "pointer" }}
             >
               <p style={{

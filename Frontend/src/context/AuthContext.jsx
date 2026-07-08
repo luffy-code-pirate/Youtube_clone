@@ -1,28 +1,40 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 
-// Creates a "broadcast channel" for user data
-// Any component in the app can tune into this channel
+// Creates a broadcast channel for auth state
 const AuthContext = createContext();
 
-// This component WRAPS our entire app (see main.jsx)
-// So every component inside has access to user, login, logout
 export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  // authLoading = true until we finish checking localStorage
+  // this prevents components from fetching before auth is ready
+  const [authLoading, setAuthLoading] = useState(true);
 
-  // Initialize from localStorage so login survives page refresh
-  const [user, setUser] = useState(() => {
-    const stored = localStorage.getItem("user");
-    // localStorage only stores strings, so we parse it back to an object
-    return stored ? JSON.parse(stored) : null;
-  });
+  useEffect(() => {
+    // runs once on app start — checks if user was previously logged in
+    try {
+      const stored = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
+      if (stored && token) {
+        setUser(JSON.parse(stored));
+      }
+    } catch (err) {
+      // if localStorage data is corrupted, clear it
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+    } finally {
+      // auth check complete — whether logged in or not
+      setAuthLoading(false);
+    }
+  }, []);
 
-  // Call this after a successful login API response
+  // called after successful login
   const login = (userData, token) => {
     localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(userData)); // objects must be stringified
+    localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };
 
-  // Call this when user clicks logout
+  // called on logout
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -30,13 +42,11 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    // value = what every child component can access
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, authLoading }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-// Custom hook — instead of writing useContext(AuthContext) every time,
-// any component just writes: const { user, login, logout } = useAuth()
+// custom hook — any component just writes: const { user } = useAuth()
 export const useAuth = () => useContext(AuthContext);

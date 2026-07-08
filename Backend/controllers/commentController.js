@@ -2,39 +2,92 @@ import Comment from "../models/Comment.js";
 
 // GET /api/comments/:videoId
 export const getComments = async (req, res) => {
-  const comments = await Comment.find({ videoId: req.params.videoId })
-    .populate("userId", "username avatar") // bring in commenter's name/avatar
-    .sort({ createdAt: -1 });
-  res.json(comments);
+  try {
+    const comments = await Comment.find({ videoId: req.params.videoId })
+      .populate("userId", "username avatar")
+      .sort({ createdAt: -1 });
+    res.json(comments);
+  } catch (err) {
+    console.error("Get comments error:", err);
+    res.status(500).json({ message: err.message });
+  }
 };
 
-// POST /api/comments (protected)
+// POST /api/comments
 export const addComment = async (req, res) => {
-  const { videoId, text } = req.body;
-  const comment = await Comment.create({ videoId, text, userId: req.userId });
-  const populated = await comment.populate("userId", "username avatar");
-  res.status(201).json(populated);
+  try {
+    const { videoId, text } = req.body;
+
+    // validate required fields
+    if (!videoId || !text) {
+      return res.status(400).json({ message: "videoId and text are required" });
+    }
+    if (!text.trim()) {
+      return res.status(400).json({ message: "Comment cannot be empty" });
+    }
+
+    const comment = await Comment.create({
+      videoId,
+      text: text.trim(),
+      userId: req.userId,
+    });
+
+    // populate userId so frontend gets username immediately
+    const populated = await Comment.findById(comment._id).populate(
+      "userId",
+      "username avatar"
+    );
+
+    res.status(201).json(populated);
+  } catch (err) {
+    console.error("Add comment error:", err);
+    res.status(500).json({ message: err.message });
+  }
 };
 
-// PUT /api/comments/:id (only the author can edit)
+// PUT /api/comments/:id
 export const updateComment = async (req, res) => {
-  const comment = await Comment.findById(req.params.id);
-  if (!comment) return res.status(404).json({ message: "Comment not found" });
-  if (comment.userId.toString() !== req.userId)
-    return res.status(403).json({ message: "Not authorized" });
+  try {
+    const comment = await Comment.findById(req.params.id);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+    if (String(comment.userId) !== String(req.userId)) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+    if (!req.body.text?.trim()) {
+      return res.status(400).json({ message: "Comment cannot be empty" });
+    }
 
-  comment.text = req.body.text;
-  await comment.save();
-  res.json(comment);
+    comment.text = req.body.text.trim();
+    await comment.save();
+
+    const populated = await Comment.findById(comment._id).populate(
+      "userId",
+      "username avatar"
+    );
+    res.json(populated);
+  } catch (err) {
+    console.error("Update comment error:", err);
+    res.status(500).json({ message: err.message });
+  }
 };
 
-// DELETE /api/comments/:id (only the author can delete)
+// DELETE /api/comments/:id
 export const deleteComment = async (req, res) => {
-  const comment = await Comment.findById(req.params.id);
-  if (!comment) return res.status(404).json({ message: "Comment not found" });
-  if (comment.userId.toString() !== req.userId)
-    return res.status(403).json({ message: "Not authorized" });
+  try {
+    const comment = await Comment.findById(req.params.id);
+    if (!comment) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+    if (String(comment.userId) !== String(req.userId)) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
 
-  await comment.deleteOne();
-  res.json({ message: "Comment deleted" });
+    await comment.deleteOne();
+    res.json({ message: "Comment deleted successfully" });
+  } catch (err) {
+    console.error("Delete comment error:", err);
+    res.status(500).json({ message: err.message });
+  }
 };

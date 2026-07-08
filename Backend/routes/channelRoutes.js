@@ -1,11 +1,21 @@
 import express from "express";
-import { createChannel, getChannelById, getMyChannel } from "../controllers/channelController.js";
+import {
+  createChannel,
+  getChannelById,
+  getMyChannel,
+  subscribeChannel,
+} from "../controllers/channelController.js";
 import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", protect, createChannel); // must be logged in to create
+// CRITICAL: /mine and /subscribe must be defined BEFORE /:id
+// Express matches routes top to bottom — if /:id comes first,
+// it treats "mine" as a channel ID and fails
+
+router.post("/", protect, createChannel);
 router.get("/mine", protect, getMyChannel);
-router.get("/:id", getChannelById);       // public viewing
+router.put("/:id/subscribe", protect, subscribeChannel);
+router.get("/:id", getChannelById);
 
 export default router;

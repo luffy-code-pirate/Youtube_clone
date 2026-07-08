@@ -3,16 +3,17 @@ import { useNavigate } from "react-router-dom";
 export default function VideoCard({ video }) {
   const navigate = useNavigate();
 
+  // format view count: 15200 → "15.2K"
   const formatViews = (views) => {
+    if (!views) return "0";
     if (views >= 1000000) return `${(views / 1000000).toFixed(1)}M`;
     if (views >= 1000) return `${(views / 1000).toFixed(1)}K`;
-    return `${views}`;
+    return views.toString();
   };
 
+  // format time ago: "2 days ago"
   const timeAgo = (dateStr) => {
-    const now = new Date();
-    const then = new Date(dateStr);
-    const diff = Math.floor((now - then) / 1000);
+    const diff = Math.floor((new Date() - new Date(dateStr)) / 1000);
     if (diff < 60) return "just now";
     if (diff < 3600) return `${Math.floor(diff / 60)} minutes ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)} hours ago`;
@@ -23,11 +24,25 @@ export default function VideoCard({ video }) {
 
   const channelInitial = video.channelId?.channelName?.[0]?.toUpperCase() || "C";
 
+  // navigate to video player
+  const handleVideoClick = () => {
+    if (video._id) navigate(`/video/${video._id}`);
+  };
+
+  // navigate to channel — guard against undefined ID
+  const handleChannelClick = (e) => {
+    e.stopPropagation(); // don't trigger video click
+    if (video.channelId?._id) {
+      navigate(`/channel/${video.channelId._id}`);
+    }
+  };
+
   return (
     <div style={{ cursor: "pointer", width: "100%" }}>
-      {/* Thumbnail */}
+
+      {/* ── Thumbnail — 16:9 ratio ── */}
       <div
-        onClick={() => navigate(`/video/${video._id}`)}
+        onClick={handleVideoClick}
         style={{
           position: "relative",
           width: "100%",
@@ -42,7 +57,8 @@ export default function VideoCard({ video }) {
           alt={video.title}
           style={{
             position: "absolute",
-            top: 0, left: 0,
+            top: 0,
+            left: 0,
             width: "100%",
             height: "100%",
             objectFit: "cover",
@@ -51,15 +67,16 @@ export default function VideoCard({ video }) {
         />
       </div>
 
-      {/* Info row */}
+      {/* ── Info row below thumbnail ── */}
       <div style={{
         display: "flex",
         gap: "12px",
         padding: "12px 0 20px",
       }}>
-        {/* Channel avatar */}
+
+        {/* Channel avatar — clicking goes to channel page */}
         <div
-          onClick={() => navigate(`/channel/${video.channelId?._id}`)}
+          onClick={handleChannelClick}
           style={{
             width: "36px",
             height: "36px",
@@ -73,7 +90,7 @@ export default function VideoCard({ video }) {
             fontSize: "14px",
             flexShrink: 0,
             marginTop: "2px",
-            cursor: "pointer",
+            cursor: video.channelId?._id ? "pointer" : "default",
           }}
         >
           {channelInitial}
@@ -81,9 +98,10 @@ export default function VideoCard({ video }) {
 
         {/* Text info */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Title */}
+
+          {/* Video title — clicking opens video player */}
           <h4
-            onClick={() => navigate(`/video/${video._id}`)}
+            onClick={handleVideoClick}
             style={{
               color: "white",
               fontSize: "14px",
@@ -95,42 +113,53 @@ export default function VideoCard({ video }) {
               WebkitLineClamp: 2,
               WebkitBoxOrient: "vertical",
               marginBottom: "6px",
+              cursor: "pointer",
             }}
           >
             {video.title}
           </h4>
 
-          {/* Channel name */}
+          {/* Channel name — clicking goes to channel */}
           <p
-            onClick={() => navigate(`/channel/${video.channelId?._id}`)}
+            onClick={handleChannelClick}
             style={{
               color: "#aaaaaa",
               fontSize: "13px",
               lineHeight: "18px",
               marginBottom: "2px",
-              cursor: "pointer",
+              cursor: video.channelId?._id ? "pointer" : "default",
             }}
-            onMouseEnter={(e) => e.currentTarget.style.color = "white"}
-            onMouseLeave={(e) => e.currentTarget.style.color = "#aaaaaa"}
+            onMouseEnter={(e) => {
+              if (video.channelId?._id) e.currentTarget.style.color = "white";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "#aaaaaa";
+            }}
           >
             {video.channelId?.channelName || "Unknown Channel"}
           </p>
 
-          {/* Views • time */}
-          <p style={{ color: "#aaaaaa", fontSize: "13px", lineHeight: "18px" }}>
+          {/* Views + time ago */}
+          <p style={{
+            color: "#aaaaaa",
+            fontSize: "13px",
+            lineHeight: "18px",
+          }}>
             {formatViews(video.views)} views • {timeAgo(video.createdAt)}
           </p>
+
         </div>
       </div>
     </div>
   );
 }
 
-// Give each channel a consistent color based on first letter
+// gives each channel a consistent color based on first letter
 function getColor(letter) {
   const colors = [
-    "#ff0000","#ff6d00","#ffab00","#2e7d32",
-    "#1565c0","#6a1b9a","#ad1457","#00838f",
+    "#ff0000", "#ff6d00", "#ffab00",
+    "#2e7d32", "#1565c0", "#6a1b9a",
+    "#ad1457", "#00838f",
   ];
   const index = (letter?.charCodeAt(0) || 0) % colors.length;
   return colors[index];

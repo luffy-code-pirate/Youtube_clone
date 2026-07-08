@@ -1,5 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "./context/AuthContext";
 
 import Header from "./components/Header";
 import Sidebar from "./components/Sidebar";
@@ -15,18 +16,32 @@ import LikedVideos from "./pages/LikedVideos";
 import Subscriptions from "./pages/Subscriptions";
 
 function App() {
+  // true = full sidebar, false = mini sidebar (icons only)
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const { authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div style={{
+        backgroundColor: "#0f0f0f",
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}>
+        <div style={{ color: "white", fontSize: "16px" }}>Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div>
-      {/* Header always visible at top */}
       <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
 
       <div style={{ display: "flex" }}>
-        {/* Sidebar toggles on hamburger click */}
-        {sidebarOpen && <Sidebar />}
+        {/* Pass sidebarOpen so Sidebar knows which mode to render */}
+        <Sidebar isOpen={sidebarOpen} />
 
-        {/* Main content area */}
         <div
           className="main-content"
           style={{ flex: 1, padding: "16px", minHeight: "calc(100vh - 56px)" }}

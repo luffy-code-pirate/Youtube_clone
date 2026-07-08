@@ -62,19 +62,30 @@ cd Youtube_Clone
 ```
 
 ### 2. Backend Setup
+
 ```bash
 cd backend
 npm install
 ```
 
-Create a `.env` file inside the `backend` folder:
+Create a `.env` file inside the `backend` folder with these exact values:
 
 PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/youtube-clone
+JWT_SECRET=mySuperSecretKey123
+
+> Important for evaluators: Make sure MongoDB is running locally before starting the backend. If you get an authentication error, use `mongodb://localhost:27017/youtube-clone` instead.
 
 Start the backend:
 ```bash
 npm run dev
+```
+
+You should see:
+
+Server running on port 5000
+MongoDB connected
+
 ```
 
 ### 3. Frontend Setup
@@ -168,8 +179,8 @@ This creates sample users, channels, videos and comments automatically.
 ### Test Login Credentials
 | Email | Password |
 |---|---|
-| john@example.com | 123456 |
-| jane@example.com | 123456 |
+| john@example.com | John@1234 |
+| jane@example.com | Jane@1234 |
 
 ---
 
