@@ -2,6 +2,9 @@
 
 A full-stack YouTube clone built with MongoDB, Express, React, and Node.js.
 
+> **Repository:** (https://github.com/luffy-code-pirate/Youtube_clone.git)
+> **Video Link:** [Watch the Demo Walkthrough](https://drive.google.com/file/d/1wxlDjOb19nSd8vIdHWz5tqY1EA7B1ETO/view?usp=drive_link)
+
 ---
 
 ## Features
@@ -57,7 +60,7 @@ youtube_clone/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/YourUsername/Youtube_Clone.git
+git clone https://github.com/luffy-code-pirate/Youtube_clone.git
 cd Youtube_Clone
 ```
 
@@ -69,7 +72,6 @@ npm install
 ```
 
 Create a `.env` file inside the `backend` folder with these exact values:
-
 PORT=5000
 MONGO_URI=mongodb://127.0.0.1:27017/youtube-clone
 JWT_SECRET=mySuperSecretKey123
